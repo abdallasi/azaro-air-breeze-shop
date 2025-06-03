@@ -68,42 +68,44 @@ const ProductCard = ({
             </div>
           </div>
 
-          {/* Bottom glass overlay - smaller and more accurate to screenshot */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white/85 backdrop-blur-md px-4 py-3 product-controls">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-black mb-0.5 leading-tight">
-                  {product.name}
-                </h3>
-                <p className="text-lg font-bold text-black">
-                  ₦{(product.price * quantity).toLocaleString()}
-                </p>
-              </div>
-              
-              {/* Quantity controls */}
-              <div className="flex items-center bg-black/5 rounded-xl px-1 py-1 ml-3">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleQuantityChange(-1);
-                  }}
-                  className="w-7 h-7 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="w-3 h-3 text-black" />
-                </button>
-                <span className="w-10 text-center font-semibold text-black text-sm">
-                  {quantity}y
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleQuantityChange(1);
-                  }}
-                  className="w-7 h-7 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
-                >
-                  <Plus className="w-3 h-3 text-black" />
-                </button>
+          {/* Floating glass container - matches screenshot */}
+          <div className="absolute bottom-4 left-4 right-4 product-controls">
+            <div className="bg-white/85 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-black mb-0.5 leading-tight">
+                    {product.name}
+                  </h3>
+                  <p className="text-lg font-bold text-black">
+                    ₦{(product.price * quantity).toLocaleString()}
+                  </p>
+                </div>
+                
+                {/* Quantity controls */}
+                <div className="flex items-center bg-black/5 rounded-xl px-1 py-1 ml-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuantityChange(-1);
+                    }}
+                    className="w-7 h-7 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="w-3 h-3 text-black" />
+                  </button>
+                  <span className="w-10 text-center font-semibold text-black text-sm">
+                    {quantity}y
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuantityChange(1);
+                    }}
+                    className="w-7 h-7 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+                  >
+                    <Plus className="w-3 h-3 text-black" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
