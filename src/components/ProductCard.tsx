@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Product {
   id: string;
@@ -27,6 +28,7 @@ const ProductCard = ({
   onQuantityChange,
   onProductClick 
 }: ProductCardProps) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   const handleQuantityChange = (delta: number) => {
     const newQuantity = Math.max(1, quantity + delta);
@@ -48,10 +50,17 @@ const ProductCard = ({
         onClick={handleProductClick}
       >
         <div className="aspect-[4/5] relative">
+          {!imageLoaded && (
+            <Skeleton className="w-full h-full absolute inset-0" />
+          )}
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            loading="lazy"
+            className={`w-full h-full object-cover transition-opacity duration-500 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
           />
           
           {/* Top-left checkbox */}
@@ -68,7 +77,7 @@ const ProductCard = ({
             </div>
           </div>
 
-          {/* Floating glass container - matches screenshot */}
+          {/* Floating glass container */}
           <div className="absolute bottom-4 left-4 right-4 product-controls">
             <div className="bg-white/85 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg">
               <div className="flex items-center justify-between">

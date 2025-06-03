@@ -1,7 +1,11 @@
 
+import { useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const HeroCarousel = () => {
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+
   const heroImages = [
     {
       src: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
@@ -21,6 +25,10 @@ const HeroCarousel = () => {
     }
   ];
 
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => new Set([...prev, index]));
+  };
+
   return (
     <div className="w-full px-6 mb-12">
       <Carousel className="w-full" opts={{ align: "start", loop: true }}>
@@ -28,10 +36,17 @@ const HeroCarousel = () => {
           {heroImages.map((image, index) => (
             <CarouselItem key={index} className="pl-2 basis-[85%] md:basis-[70%]">
               <div className="relative h-96 rounded-[28px] overflow-hidden shadow-xl bg-gradient-to-br from-gray-50 to-gray-100">
+                {!loadedImages.has(index) && (
+                  <Skeleton className="w-full h-full absolute inset-0 rounded-[28px]" />
+                )}
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                  loading="lazy"
+                  className={`w-full h-full object-cover transition-all duration-700 hover:scale-105 ${
+                    loadedImages.has(index) ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => handleImageLoad(index)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
