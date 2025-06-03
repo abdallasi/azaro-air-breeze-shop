@@ -4,33 +4,38 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 const HeroCarousel = () => {
   const heroImages = [
     {
-      src: "/lovable-uploads/e6be07de-56d8-47cf-9682-7bdd68c78541.png",
-      alt: "Azaro Air fabric floating in nature"
+      src: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
+      alt: "Azaro Air fabric in motion"
     },
     {
-      src: "/lovable-uploads/b6a9eab3-bece-4246-b5db-3fef71ab816c.png",
-      alt: "Azaro Air fabric against blue sky"
+      src: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png",
+      alt: "Azaro Air floating in nature"
     },
     {
-      src: "/lovable-uploads/f29ddcda-8af3-4385-afbe-58412a8cdb21.png",
-      alt: "Azaro Air logo with fabric"
+      src: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png",
+      alt: "Azaro Air against coastal backdrop"
+    },
+    {
+      src: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png",
+      alt: "Azaro Air against blue sky"
     }
   ];
 
   return (
-    <div className="w-full px-4 mb-8">
-      <Carousel className="w-full">
-        <CarouselContent>
+    <div className="w-full px-6 mb-12">
+      <Carousel className="w-full" opts={{ align: "start", loop: true }}>
+        <CarouselContent className="-ml-2">
           {heroImages.map((image, index) => (
-            <CarouselItem key={index} className="pl-4">
-              <div className="relative h-80 rounded-3xl overflow-hidden shadow-2xl">
+            <CarouselItem key={index} className="pl-2 basis-[85%] md:basis-[70%]">
+              <div className="relative h-96 rounded-[28px] overflow-hidden shadow-xl bg-gradient-to-br from-gray-50 to-gray-100">
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-full object-cover animate-float"
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/10 flex items-end justify-center pb-8">
-                  <p className="text-white text-lg font-inter font-light tracking-wide">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <p className="text-white text-xl font-light tracking-wide drop-shadow-lg">
                     Air. In motion.
                   </p>
                 </div>
@@ -38,8 +43,8 @@ const HeroCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-2" />
-        <CarouselNext className="right-2" />
+        <CarouselPrevious className="left-2 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20" />
+        <CarouselNext className="right-2 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20" />
       </Carousel>
     </div>
   );

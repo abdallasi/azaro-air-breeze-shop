@@ -20,22 +20,28 @@ const Index = () => {
 
   const products = [
     {
-      id: "air-white-001",
-      name: "Azaro Air — White 001",
+      id: "azaro-air-001",
+      name: "Azaro Air 001",
       price: 3500,
-      image: "/lovable-uploads/de1ebf44-36a6-48fa-a988-0f52b68dcfad.png"
+      image: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png"
     },
     {
-      id: "air-earth-002",
-      name: "Azaro Air — Earth 002",
+      id: "azaro-air-002",
+      name: "Azaro Air 002",
       price: 3500,
-      image: "/lovable-uploads/9293ccbd-77fa-4c57-bad6-f0a1f8a8b52a.png"
+      image: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png"
     },
     {
-      id: "air-cream-003",
-      name: "Azaro Air — Cream 003",
+      id: "azaro-air-003",
+      name: "Azaro Air 003",
       price: 3500,
-      image: "/lovable-uploads/82dee669-cf77-4ee2-a9ef-180e1b04c448.png"
+      image: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png"
+    },
+    {
+      id: "azaro-air-004",
+      name: "Azaro Air 004",
+      price: 3500,
+      image: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png"
     }
   ];
 
