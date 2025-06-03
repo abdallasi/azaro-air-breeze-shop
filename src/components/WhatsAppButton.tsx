@@ -33,9 +33,9 @@ const WhatsAppButton = ({ selectedProducts, totalYards }: WhatsAppButtonProps) =
     <div className="fixed bottom-6 left-4 right-4 z-50">
       <button
         onClick={handleWhatsAppOrder}
-        className="w-full bg-green-500 hover:bg-green-600 text-white font-inter font-semibold py-4 px-6 rounded-2xl shadow-2xl transition-colors backdrop-blur-sm"
+        className="w-full bg-black hover:bg-gray-900 text-white font-semibold py-4 px-6 rounded-2xl shadow-2xl transition-all duration-200 backdrop-blur-sm text-base"
       >
-        Order {selectedProducts.length} {selectedProducts.length === 1 ? 'Fabric' : 'Fabrics'} · {totalYards} {totalYards === 1 ? 'Yard' : 'Yards'} – Send via WhatsApp
+        Order via WhatsApp
       </button>
     </div>
   );

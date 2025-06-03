@@ -1,11 +1,15 @@
 
+import { useState } from "react";
 import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductCard from "@/components/ProductCard";
+import ProductDetailView from "@/components/ProductDetailView";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useProductSelection } from "@/hooks/useProductSelection";
 
 const Index = () => {
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  
   const {
     updateSelection,
     updateQuantity,
@@ -38,6 +42,25 @@ const Index = () => {
   const selectedProducts = getSelectedProducts(products);
   const totalYards = getTotalYards(products);
 
+  const handleProductClick = (productId: string) => {
+    setSelectedProductId(productId);
+  };
+
+  const handleBackToList = () => {
+    setSelectedProductId(null);
+  };
+
+  const selectedProduct = products.find(p => p.id === selectedProductId);
+
+  if (selectedProduct) {
+    return (
+      <ProductDetailView 
+        product={selectedProduct} 
+        onBack={handleBackToList} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-inter">
       <Header />
@@ -54,6 +77,7 @@ const Index = () => {
               quantity={selection.quantity}
               onSelectionChange={updateSelection}
               onQuantityChange={updateQuantity}
+              onProductClick={handleProductClick}
             />
           );
         })}

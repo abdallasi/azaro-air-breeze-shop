@@ -16,6 +16,7 @@ interface ProductCardProps {
   quantity: number;
   onSelectionChange: (productId: string, selected: boolean) => void;
   onQuantityChange: (productId: string, quantity: number) => void;
+  onProductClick: (productId: string) => void;
 }
 
 const ProductCard = ({ 
@@ -23,7 +24,8 @@ const ProductCard = ({
   isSelected, 
   quantity, 
   onSelectionChange, 
-  onQuantityChange 
+  onQuantityChange,
+  onProductClick 
 }: ProductCardProps) => {
   
   const handleQuantityChange = (delta: number) => {
@@ -31,9 +33,20 @@ const ProductCard = ({
     onQuantityChange(product.id, newQuantity);
   };
 
+  const handleProductClick = (e: React.MouseEvent) => {
+    // Don't trigger product click if clicking on controls
+    if ((e.target as HTMLElement).closest('.product-controls')) {
+      return;
+    }
+    onProductClick(product.id);
+  };
+
   return (
-    <div className="w-full p-4">
-      <div className="relative rounded-3xl overflow-hidden shadow-xl bg-white">
+    <div className="w-full px-4 mb-3">
+      <div 
+        className="relative rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer"
+        onClick={handleProductClick}
+      >
         <div className="aspect-[4/5] relative">
           <img
             src={product.image}
@@ -42,46 +55,54 @@ const ProductCard = ({
           />
           
           {/* Top-left checkbox */}
-          <div className="absolute top-4 left-4">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelectionChange(product.id, checked as boolean)}
-              className="h-6 w-6 rounded-full bg-white/80 backdrop-blur-sm border-2 border-white/60 data-[state=checked]:bg-black data-[state=checked]:border-black"
-            />
+          <div className="absolute top-3 left-3 product-controls">
+            <div className="flex flex-col items-center">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) => onSelectionChange(product.id, checked as boolean)}
+                className="h-5 w-5 rounded-full bg-white/90 backdrop-blur-sm border border-white/60 data-[state=checked]:bg-black data-[state=checked]:border-black mb-1"
+              />
+              <span className="text-xs font-medium text-white/90 bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                Select
+              </span>
+            </div>
           </div>
 
-          {/* Glass overlay with product info */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md p-6 rounded-t-3xl border-t border-white/20">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-inter font-semibold text-black mb-1">
+          {/* Bottom glass overlay - smaller and more accurate to screenshot */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white/85 backdrop-blur-md px-4 py-3 product-controls">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-black mb-0.5 leading-tight">
                   {product.name}
                 </h3>
-                <p className="text-2xl font-inter font-bold text-black">
-                  ₦{(product.price * quantity).toLocaleString()} 
-                  <span className="text-sm font-normal text-gray-600 ml-1">
-                    ({quantity} {quantity === 1 ? 'yard' : 'yards'})
-                  </span>
+                <p className="text-lg font-bold text-black">
+                  ₦{(product.price * quantity).toLocaleString()}
                 </p>
               </div>
               
               {/* Quantity controls */}
-              <div className="flex items-center bg-black/10 rounded-2xl p-1">
+              <div className="flex items-center bg-black/5 rounded-xl px-1 py-1 ml-3">
                 <button
-                  onClick={() => handleQuantityChange(-1)}
-                  className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleQuantityChange(-1);
+                  }}
+                  className="w-7 h-7 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
                   disabled={quantity <= 1}
                 >
-                  <Minus className="w-4 h-4 text-black" />
+                  <Minus className="w-3 h-3 text-black" />
                 </button>
-                <span className="w-12 text-center font-inter font-semibold text-black">
-                  {quantity}
+                <span className="w-10 text-center font-semibold text-black text-sm">
+                  {quantity}y
                 </span>
                 <button
-                  onClick={() => handleQuantityChange(1)}
-                  className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleQuantityChange(1);
+                  }}
+                  className="w-7 h-7 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
                 >
-                  <Plus className="w-4 h-4 text-black" />
+                  <Plus className="w-3 h-3 text-black" />
                 </button>
               </div>
             </div>
