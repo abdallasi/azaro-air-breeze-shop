@@ -1,12 +1,68 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import Header from "@/components/Header";
+import HeroCarousel from "@/components/HeroCarousel";
+import ProductCard from "@/components/ProductCard";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { useProductSelection } from "@/hooks/useProductSelection";
 
 const Index = () => {
+  const {
+    updateSelection,
+    updateQuantity,
+    getSelection,
+    getSelectedProducts,
+    getTotalYards
+  } = useProductSelection();
+
+  const products = [
+    {
+      id: "air-white-001",
+      name: "Azaro Air — White 001",
+      price: 3500,
+      image: "/lovable-uploads/de1ebf44-36a6-48fa-a988-0f52b68dcfad.png"
+    },
+    {
+      id: "air-earth-002",
+      name: "Azaro Air — Earth 002",
+      price: 3500,
+      image: "/lovable-uploads/9293ccbd-77fa-4c57-bad6-f0a1f8a8b52a.png"
+    },
+    {
+      id: "air-cream-003",
+      name: "Azaro Air — Cream 003",
+      price: 3500,
+      image: "/lovable-uploads/82dee669-cf77-4ee2-a9ef-180e1b04c448.png"
+    }
+  ];
+
+  const selectedProducts = getSelectedProducts(products);
+  const totalYards = getTotalYards(products);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-inter">
+      <Header />
+      <HeroCarousel />
+      
+      <div className="pb-32">
+        {products.map((product) => {
+          const selection = getSelection(product.id);
+          return (
+            <ProductCard
+              key={product.id}
+              product={product}
+              isSelected={selection.selected}
+              quantity={selection.quantity}
+              onSelectionChange={updateSelection}
+              onQuantityChange={updateQuantity}
+            />
+          );
+        })}
       </div>
+
+      <WhatsAppButton 
+        selectedProducts={selectedProducts}
+        totalYards={totalYards}
+      />
     </div>
   );
 };
