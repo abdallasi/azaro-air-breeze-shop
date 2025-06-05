@@ -27,6 +27,7 @@ interface ProductManagementContextType {
 const ProductManagementContext = createContext<ProductManagementContextType | undefined>(undefined);
 
 export const ProductManagementProvider = ({ children }: { children: ReactNode }) => {
+  // Separate state management for products and hero images
   const [products, setProducts] = useState<Product[]>([
     {
       id: "azaro-air-001",
@@ -54,6 +55,7 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     }
   ]);
 
+  // Completely separate state for hero images
   const [heroImages, setHeroImages] = useState<HeroImage[]>([
     {
       src: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
@@ -73,11 +75,14 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     }
   ]);
 
+  // Product management functions - only affect products state
   const updateProduct = (id: string, data: Omit<Product, 'id'>) => {
+    console.log('Updating product:', id, data);
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
   };
 
   const deleteProduct = (id: string) => {
+    console.log('Deleting product:', id);
     setProducts(prev => prev.filter(p => p.id !== id));
   };
 
@@ -86,18 +91,23 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
       ...data,
       id: `azaro-air-${Date.now()}`
     };
+    console.log('Adding new product:', newProduct);
     setProducts(prev => [...prev, newProduct]);
   };
 
+  // Hero image management functions - only affect heroImages state
   const updateHeroImage = (index: number, data: HeroImage) => {
+    console.log('Updating hero image at index:', index, data);
     setHeroImages(prev => prev.map((hero, i) => i === index ? data : hero));
   };
 
   const deleteHeroImage = (index: number) => {
+    console.log('Deleting hero image at index:', index);
     setHeroImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const addHeroImage = (data: HeroImage) => {
+    console.log('Adding new hero image:', data);
     setHeroImages(prev => [...prev, data]);
   };
 
