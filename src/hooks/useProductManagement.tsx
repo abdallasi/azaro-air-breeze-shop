@@ -1,0 +1,128 @@
+
+import { createContext, useContext, useState, ReactNode } from "react";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+}
+
+interface HeroImage {
+  src: string;
+  alt: string;
+}
+
+interface ProductManagementContextType {
+  products: Product[];
+  heroImages: HeroImage[];
+  updateProduct: (id: string, data: Omit<Product, 'id'>) => void;
+  deleteProduct: (id: string) => void;
+  addProduct: (data: Omit<Product, 'id'>) => void;
+  updateHeroImage: (index: number, data: HeroImage) => void;
+  deleteHeroImage: (index: number) => void;
+  addHeroImage: (data: HeroImage) => void;
+}
+
+const ProductManagementContext = createContext<ProductManagementContextType | undefined>(undefined);
+
+export const ProductManagementProvider = ({ children }: { children: ReactNode }) => {
+  const [products, setProducts] = useState<Product[]>([
+    {
+      id: "azaro-air-001",
+      name: "Azaro Air 001",
+      price: 3500,
+      image: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png"
+    },
+    {
+      id: "azaro-air-002",
+      name: "Azaro Air 002",
+      price: 3500,
+      image: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png"
+    },
+    {
+      id: "azaro-air-003",
+      name: "Azaro Air 003",
+      price: 3500,
+      image: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png"
+    },
+    {
+      id: "azaro-air-004",
+      name: "Azaro Air 004",
+      price: 3500,
+      image: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png"
+    }
+  ]);
+
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([
+    {
+      src: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
+      alt: "Azaro Air fabric in motion"
+    },
+    {
+      src: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png",
+      alt: "Azaro Air floating in nature"
+    },
+    {
+      src: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png",
+      alt: "Azaro Air against coastal backdrop"
+    },
+    {
+      src: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png",
+      alt: "Azaro Air against blue sky"
+    }
+  ]);
+
+  const updateProduct = (id: string, data: Omit<Product, 'id'>) => {
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  };
+
+  const deleteProduct = (id: string) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+  };
+
+  const addProduct = (data: Omit<Product, 'id'>) => {
+    const newProduct = {
+      ...data,
+      id: `azaro-air-${Date.now()}`
+    };
+    setProducts(prev => [...prev, newProduct]);
+  };
+
+  const updateHeroImage = (index: number, data: HeroImage) => {
+    setHeroImages(prev => prev.map((hero, i) => i === index ? data : hero));
+  };
+
+  const deleteHeroImage = (index: number) => {
+    setHeroImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addHeroImage = (data: HeroImage) => {
+    setHeroImages(prev => [...prev, data]);
+  };
+
+  const value = {
+    products,
+    heroImages,
+    updateProduct,
+    deleteProduct,
+    addProduct,
+    updateHeroImage,
+    deleteHeroImage,
+    addHeroImage
+  };
+
+  return (
+    <ProductManagementContext.Provider value={value}>
+      {children}
+    </ProductManagementContext.Provider>
+  );
+};
+
+export const useProductManagement = () => {
+  const context = useContext(ProductManagementContext);
+  if (!context) {
+    throw new Error("useProductManagement must be used within ProductManagementProvider");
+  }
+  return context;
+};

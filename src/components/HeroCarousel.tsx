@@ -2,28 +2,11 @@
 import { useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProductManagement } from "@/hooks/useProductManagement";
 
 const HeroCarousel = () => {
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-
-  const heroImages = [
-    {
-      src: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
-      alt: "Azaro Air fabric in motion"
-    },
-    {
-      src: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png",
-      alt: "Azaro Air floating in nature"
-    },
-    {
-      src: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png",
-      alt: "Azaro Air against coastal backdrop"
-    },
-    {
-      src: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png",
-      alt: "Azaro Air against blue sky"
-    }
-  ];
+  const { heroImages } = useProductManagement();
 
   const handleImageLoad = (index: number) => {
     setLoadedImages(prev => new Set([...prev, index]));
