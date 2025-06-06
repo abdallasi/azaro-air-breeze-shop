@@ -1,5 +1,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
@@ -11,6 +12,7 @@ interface Product {
 }
 
 interface HeroImage {
+  id?: number;
   src: string;
   alt: string;
   createdAt?: string;
@@ -20,175 +22,237 @@ interface HeroImage {
 interface ProductManagementContextType {
   products: Product[];
   heroImages: HeroImage[];
-  updateProduct: (id: string, data: Omit<Product, 'id'>) => void;
-  deleteProduct: (id: string) => void;
-  addProduct: (data: Omit<Product, 'id'>) => void;
-  updateHeroImage: (index: number, data: HeroImage) => void;
-  deleteHeroImage: (index: number) => void;
-  addHeroImage: (data: HeroImage) => void;
+  updateProduct: (id: string, data: Omit<Product, 'id'>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  addProduct: (data: Omit<Product, 'id'>) => Promise<void>;
+  updateHeroImage: (index: number, data: HeroImage) => Promise<void>;
+  deleteHeroImage: (index: number) => Promise<void>;
+  addHeroImage: (data: HeroImage) => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const ProductManagementContext = createContext<ProductManagementContextType | undefined>(undefined);
 
-// Default data - only used if localStorage is empty
-const defaultProducts: Product[] = [
-  {
-    id: "azaro-air-001",
-    name: "Azaro Air 001",
-    price: 3500,
-    image: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "azaro-air-002",
-    name: "Azaro Air 002",
-    price: 3500,
-    image: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "azaro-air-003",
-    name: "Azaro Air 003",
-    price: 3500,
-    image: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "azaro-air-004",
-    name: "Azaro Air 004",
-    price: 3500,
-    image: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
-
-const defaultHeroImages: HeroImage[] = [
-  {
-    src: "/lovable-uploads/de5437e6-e7e7-49a0-b111-fb38c85517c0.png",
-    alt: "Azaro Air fabric in motion",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    src: "/lovable-uploads/750e7d97-f592-4785-8f0f-740ecf93f04e.png",
-    alt: "Azaro Air floating in nature",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    src: "/lovable-uploads/2b18bf3b-98f4-4136-bcaa-c3fd11903f89.png",
-    alt: "Azaro Air against coastal backdrop",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    src: "/lovable-uploads/5d68c649-9f9d-43bc-b368-f1ed2d4f6c81.png",
-    alt: "Azaro Air against blue sky",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
-
-// Storage keys
-const PRODUCTS_STORAGE_KEY = 'azaro_products';
-const HERO_IMAGES_STORAGE_KEY = 'azaro_hero_images';
-
-// Helper functions for localStorage
-const loadFromStorage = <T,>(key: string, defaultData: T): T => {
-  try {
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (error) {
-    console.error(`Error loading ${key} from localStorage:`, error);
-  }
-  return defaultData;
-};
-
-const saveToStorage = <T,>(key: string, data: T): void => {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-    console.log(`Saved ${key} to localStorage:`, data);
-  } catch (error) {
-    console.error(`Error saving ${key} to localStorage:`, error);
-  }
-};
-
 export const ProductManagementProvider = ({ children }: { children: ReactNode }) => {
-  // Load initial data from localStorage or use defaults
-  const [products, setProducts] = useState<Product[]>(() => 
-    loadFromStorage(PRODUCTS_STORAGE_KEY, defaultProducts)
-  );
-  
-  const [heroImages, setHeroImages] = useState<HeroImage[]>(() => 
-    loadFromStorage(HERO_IMAGES_STORAGE_KEY, defaultHeroImages)
-  );
+  const [products, setProducts] = useState<Product[]>([]);
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Save to localStorage whenever state changes
+  // Load initial data from Supabase
   useEffect(() => {
-    saveToStorage(PRODUCTS_STORAGE_KEY, products);
-  }, [products]);
+    loadData();
+  }, []);
 
-  useEffect(() => {
-    saveToStorage(HERO_IMAGES_STORAGE_KEY, heroImages);
-  }, [heroImages]);
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Load products
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (productsError) throw productsError;
+
+      // Load hero images
+      const { data: heroImagesData, error: heroImagesError } = await supabase
+        .from('hero_images')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (heroImagesError) throw heroImagesError;
+
+      // Transform data to match our interface
+      const transformedProducts = productsData?.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        image: p.image,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at
+      })) || [];
+
+      const transformedHeroImages = heroImagesData?.map(h => ({
+        id: h.id,
+        src: h.src,
+        alt: h.alt,
+        createdAt: h.created_at,
+        updatedAt: h.updated_at
+      })) || [];
+
+      setProducts(transformedProducts);
+      setHeroImages(transformedHeroImages);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Product management functions
-  const updateProduct = (id: string, data: Omit<Product, 'id'>) => {
-    console.log('Updating product:', id, data);
-    setProducts(prev => prev.map(p => 
-      p.id === id 
-        ? { ...p, ...data, updatedAt: new Date().toISOString() } 
-        : p
-    ));
+  const updateProduct = async (id: string, data: Omit<Product, 'id'>) => {
+    try {
+      console.log('Updating product:', id, data);
+      
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name: data.name,
+          price: data.price,
+          image: data.image,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Update local state
+      setProducts(prev => prev.map(p => 
+        p.id === id 
+          ? { ...p, ...data, updatedAt: new Date().toISOString() } 
+          : p
+      ));
+    } catch (err) {
+      console.error('Error updating product:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update product');
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    console.log('Deleting product:', id);
-    setProducts(prev => prev.filter(p => p.id !== id));
+  const deleteProduct = async (id: string) => {
+    try {
+      console.log('Deleting product:', id);
+      
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Update local state
+      setProducts(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete product');
+    }
   };
 
-  const addProduct = (data: Omit<Product, 'id'>) => {
-    const timestamp = new Date().toISOString();
-    const newProduct = {
-      ...data,
-      id: `azaro-air-${Date.now()}`,
-      createdAt: timestamp,
-      updatedAt: timestamp
-    };
-    console.log('Adding new product:', newProduct);
-    setProducts(prev => [...prev, newProduct]);
+  const addProduct = async (data: Omit<Product, 'id'>) => {
+    try {
+      const newId = `azaro-air-${Date.now()}`;
+      console.log('Adding new product:', newId, data);
+      
+      const { error } = await supabase
+        .from('products')
+        .insert({
+          id: newId,
+          name: data.name,
+          price: data.price,
+          image: data.image
+        });
+
+      if (error) throw error;
+
+      // Update local state
+      const newProduct = {
+        ...data,
+        id: newId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      setProducts(prev => [...prev, newProduct]);
+    } catch (err) {
+      console.error('Error adding product:', err);
+      setError(err instanceof Error ? err.message : 'Failed to add product');
+    }
   };
 
   // Hero image management functions
-  const updateHeroImage = (index: number, data: HeroImage) => {
-    console.log('Updating hero image at index:', index, data);
-    setHeroImages(prev => prev.map((hero, i) => 
-      i === index 
-        ? { ...data, updatedAt: new Date().toISOString() } 
-        : hero
-    ));
+  const updateHeroImage = async (index: number, data: HeroImage) => {
+    try {
+      const heroImage = heroImages[index];
+      if (!heroImage?.id) return;
+
+      console.log('Updating hero image at index:', index, data);
+      
+      const { error } = await supabase
+        .from('hero_images')
+        .update({
+          src: data.src,
+          alt: data.alt,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', heroImage.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setHeroImages(prev => prev.map((hero, i) => 
+        i === index 
+          ? { ...data, id: hero.id, updatedAt: new Date().toISOString() } 
+          : hero
+      ));
+    } catch (err) {
+      console.error('Error updating hero image:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update hero image');
+    }
   };
 
-  const deleteHeroImage = (index: number) => {
-    console.log('Deleting hero image at index:', index);
-    setHeroImages(prev => prev.filter((_, i) => i !== index));
+  const deleteHeroImage = async (index: number) => {
+    try {
+      const heroImage = heroImages[index];
+      if (!heroImage?.id) return;
+
+      console.log('Deleting hero image at index:', index);
+      
+      const { error } = await supabase
+        .from('hero_images')
+        .delete()
+        .eq('id', heroImage.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setHeroImages(prev => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error('Error deleting hero image:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete hero image');
+    }
   };
 
-  const addHeroImage = (data: HeroImage) => {
-    const timestamp = new Date().toISOString();
-    const newHeroImage = {
-      ...data,
-      createdAt: timestamp,
-      updatedAt: timestamp
-    };
-    console.log('Adding new hero image:', newHeroImage);
-    setHeroImages(prev => [...prev, newHeroImage]);
+  const addHeroImage = async (data: HeroImage) => {
+    try {
+      console.log('Adding new hero image:', data);
+      
+      const { data: insertedData, error } = await supabase
+        .from('hero_images')
+        .insert({
+          src: data.src,
+          alt: data.alt
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local state
+      const newHeroImage = {
+        id: insertedData.id,
+        src: insertedData.src,
+        alt: insertedData.alt,
+        createdAt: insertedData.created_at,
+        updatedAt: insertedData.updated_at
+      };
+      setHeroImages(prev => [...prev, newHeroImage]);
+    } catch (err) {
+      console.error('Error adding hero image:', err);
+      setError(err instanceof Error ? err.message : 'Failed to add hero image');
+    }
   };
 
   const value = {
@@ -199,7 +263,9 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     addProduct,
     updateHeroImage,
     deleteHeroImage,
-    addHeroImage
+    addHeroImage,
+    isLoading,
+    error
   };
 
   return (
