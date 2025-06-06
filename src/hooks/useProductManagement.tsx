@@ -98,7 +98,7 @@ const PRODUCTS_STORAGE_KEY = 'azaro_products';
 const HERO_IMAGES_STORAGE_KEY = 'azaro_hero_images';
 
 // Helper functions for localStorage
-const loadFromStorage = <T>(key: string, defaultData: T): T => {
+const loadFromStorage = <T,>(key: string, defaultData: T): T => {
   try {
     const stored = localStorage.getItem(key);
     if (stored) {
@@ -110,7 +110,7 @@ const loadFromStorage = <T>(key: string, defaultData: T): T => {
   return defaultData;
 };
 
-const saveToStorage = <T>(key: string, data: T): void => {
+const saveToStorage = <T,>(key: string, data: T): void => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
     console.log(`Saved ${key} to localStorage:`, data);
