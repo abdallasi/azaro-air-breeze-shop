@@ -1,23 +1,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface HeroImage {
-  id?: number;
-  src: string;
-  alt: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { Product, HeroImage } from "@/types/product";
+import { productService } from "@/services/productService";
+import { heroImageService } from "@/services/heroImageService";
 
 interface ProductManagementContextType {
   products: Product[];
@@ -41,7 +26,6 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load initial data from Supabase
   useEffect(() => {
     loadData();
   }, []);
@@ -53,52 +37,15 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
 
       console.log('Loading data from Supabase...');
 
-      // Load products and hero images in parallel for better performance
-      const [productsResponse, heroImagesResponse] = await Promise.all([
-        supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('hero_images')
-          .select('*')
-          .order('created_at', { ascending: true })
+      const [transformedProducts, transformedHeroImages] = await Promise.all([
+        productService.getAll(),
+        heroImageService.getAll()
       ]);
-
-      if (productsResponse.error) {
-        console.error('Products error:', productsResponse.error);
-        throw productsResponse.error;
-      }
-      if (heroImagesResponse.error) {
-        console.error('Hero images error:', heroImagesResponse.error);
-        throw heroImagesResponse.error;
-      }
-
-      console.log('Raw products data:', productsResponse.data);
-      console.log('Raw hero images data:', heroImagesResponse.data);
-
-      // Transform data to match our interface
-      const transformedProducts = productsResponse.data?.map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        image: p.image,
-        createdAt: p.created_at,
-        updatedAt: p.updated_at
-      })) || [];
-
-      const transformedHeroImages = heroImagesResponse.data?.map(h => ({
-        id: h.id,
-        src: h.src,
-        alt: h.alt,
-        createdAt: h.created_at,
-        updatedAt: h.updated_at
-      })) || [];
 
       console.log('Transformed products:', transformedProducts);
       console.log('Transformed hero images:', transformedHeroImages);
 
-      // Check if images are accessible
+      // Debug image accessibility
       transformedProducts.forEach((product, index) => {
         console.log(`Product ${index + 1} (${product.name}):`, product.image);
       });
@@ -117,30 +64,14 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     }
   };
 
-  // Add refetch function for manual data refresh
   const refetch = async () => {
     console.log('Refetching data...');
     await loadData();
   };
 
-  // Product management functions
   const updateProduct = async (id: string, data: Omit<Product, 'id'>) => {
     try {
-      console.log('Updating product:', id, data);
-      
-      const { error } = await supabase
-        .from('products')
-        .update({
-          name: data.name,
-          price: data.price,
-          image: data.image,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      // Update local state
+      await productService.update(id, data);
       setProducts(prev => prev.map(p => 
         p.id === id 
           ? { ...p, ...data, updatedAt: new Date().toISOString() } 
@@ -154,16 +85,7 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
 
   const deleteProduct = async (id: string) => {
     try {
-      console.log('Deleting product:', id);
-      
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      // Update local state
+      await productService.delete(id);
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (err) {
       console.error('Error deleting product:', err);
@@ -173,27 +95,7 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
 
   const addProduct = async (data: Omit<Product, 'id'>) => {
     try {
-      const newId = `azaro-air-${Date.now()}`;
-      console.log('Adding new product:', newId, data);
-      
-      const { error } = await supabase
-        .from('products')
-        .insert({
-          id: newId,
-          name: data.name,
-          price: data.price,
-          image: data.image
-        });
-
-      if (error) throw error;
-
-      // Update local state
-      const newProduct = {
-        ...data,
-        id: newId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      const newProduct = await productService.create(data);
       setProducts(prev => [...prev, newProduct]);
     } catch (err) {
       console.error('Error adding product:', err);
@@ -201,26 +103,12 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     }
   };
 
-  // Hero image management functions
   const updateHeroImage = async (index: number, data: HeroImage) => {
     try {
       const heroImage = heroImages[index];
       if (!heroImage?.id) return;
 
-      console.log('Updating hero image at index:', index, data);
-      
-      const { error } = await supabase
-        .from('hero_images')
-        .update({
-          src: data.src,
-          alt: data.alt,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', heroImage.id);
-
-      if (error) throw error;
-
-      // Update local state
+      await heroImageService.update(heroImage.id, data);
       setHeroImages(prev => prev.map((hero, i) => 
         i === index 
           ? { ...data, id: hero.id, updatedAt: new Date().toISOString() } 
@@ -237,16 +125,7 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
       const heroImage = heroImages[index];
       if (!heroImage?.id) return;
 
-      console.log('Deleting hero image at index:', index);
-      
-      const { error } = await supabase
-        .from('hero_images')
-        .delete()
-        .eq('id', heroImage.id);
-
-      if (error) throw error;
-
-      // Update local state
+      await heroImageService.delete(heroImage.id);
       setHeroImages(prev => prev.filter((_, i) => i !== index));
     } catch (err) {
       console.error('Error deleting hero image:', err);
@@ -256,27 +135,7 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
 
   const addHeroImage = async (data: HeroImage) => {
     try {
-      console.log('Adding new hero image:', data);
-      
-      const { data: insertedData, error } = await supabase
-        .from('hero_images')
-        .insert({
-          src: data.src,
-          alt: data.alt
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update local state
-      const newHeroImage = {
-        id: insertedData.id,
-        src: insertedData.src,
-        alt: insertedData.alt,
-        createdAt: insertedData.created_at,
-        updatedAt: insertedData.updated_at
-      };
+      const newHeroImage = await heroImageService.create(data);
       setHeroImages(prev => [...prev, newHeroImage]);
     } catch (err) {
       console.error('Error adding hero image:', err);

@@ -74,7 +74,7 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
         <button
           onClick={handlePayment}
           disabled={isProcessing}
-          className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium py-4 px-6 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base border border-white/20"
+          className="w-full bg-black/90 hover:bg-black backdrop-blur-sm text-white font-medium py-4 px-6 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base border border-white/10"
         >
           {isProcessing ? (
             <div className="flex items-center justify-center gap-2">
