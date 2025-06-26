@@ -59,14 +59,14 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
 
   return (
     <div className="fixed bottom-6 left-4 right-4 z-50">
-      <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-4 shadow-2xl">
+      <div className="backdrop-blur-xl bg-black/20 border border-white/10 rounded-3xl p-4 shadow-2xl">
         {showEmailInput && (
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="w-full px-4 py-3 mb-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm placeholder-white/70 text-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50"
+            className="w-full px-4 py-3 mb-4 rounded-2xl border border-white/30 bg-white/10 backdrop-blur-sm placeholder-white/70 text-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50"
             autoFocus
           />
         )}
@@ -74,7 +74,7 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
         <button
           onClick={handlePayment}
           disabled={isProcessing}
-          className="w-full bg-black/90 hover:bg-black backdrop-blur-sm text-white font-medium py-4 px-6 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base border border-white/10"
+          className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium py-4 px-6 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base border border-white/20"
         >
           {isProcessing ? (
             <div className="flex items-center justify-center gap-2">

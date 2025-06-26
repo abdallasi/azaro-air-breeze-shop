@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -64,11 +65,17 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
           .order('created_at', { ascending: true })
       ]);
 
-      if (productsResponse.error) throw productsResponse.error;
-      if (heroImagesResponse.error) throw heroImagesResponse.error;
+      if (productsResponse.error) {
+        console.error('Products error:', productsResponse.error);
+        throw productsResponse.error;
+      }
+      if (heroImagesResponse.error) {
+        console.error('Hero images error:', heroImagesResponse.error);
+        throw heroImagesResponse.error;
+      }
 
-      console.log('Products data:', productsResponse.data);
-      console.log('Hero images data:', heroImagesResponse.data);
+      console.log('Raw products data:', productsResponse.data);
+      console.log('Raw hero images data:', heroImagesResponse.data);
 
       // Transform data to match our interface
       const transformedProducts = productsResponse.data?.map(p => ({
@@ -91,6 +98,15 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
       console.log('Transformed products:', transformedProducts);
       console.log('Transformed hero images:', transformedHeroImages);
 
+      // Check if images are accessible
+      transformedProducts.forEach((product, index) => {
+        console.log(`Product ${index + 1} (${product.name}):`, product.image);
+      });
+
+      transformedHeroImages.forEach((hero, index) => {
+        console.log(`Hero image ${index + 1} (${hero.alt}):`, hero.src);
+      });
+
       setProducts(transformedProducts);
       setHeroImages(transformedHeroImages);
     } catch (err) {
@@ -103,6 +119,7 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
 
   // Add refetch function for manual data refresh
   const refetch = async () => {
+    console.log('Refetching data...');
     await loadData();
   };
 
