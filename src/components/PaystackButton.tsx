@@ -59,14 +59,14 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
 
   return (
     <div className="fixed bottom-6 left-4 right-4 z-50">
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-white/20">
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-4 shadow-2xl">
         {showEmailInput && (
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="w-full px-4 py-3 mb-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/20"
+            className="w-full px-4 py-3 mb-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm placeholder-white/70 text-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50"
             autoFocus
           />
         )}
@@ -74,7 +74,7 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
         <button
           onClick={handlePayment}
           disabled={isProcessing}
-          className="w-full bg-black hover:bg-gray-900 text-white font-medium py-4 px-6 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+          className="w-full bg-black/90 hover:bg-black backdrop-blur-sm text-white font-medium py-4 px-6 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base border border-white/10"
         >
           {isProcessing ? (
             <div className="flex items-center justify-center gap-2">
@@ -84,7 +84,7 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
           ) : (
             <>
               <div className="flex items-center justify-center gap-2">
-                <span>Pay with Paystack</span>
+                <span>Get it now</span>
               </div>
               <div className="text-sm opacity-80 mt-1">
                 ₦{totalAmount.toLocaleString()} • {totalYards} {totalYards === 1 ? 'yard' : 'yards'}
