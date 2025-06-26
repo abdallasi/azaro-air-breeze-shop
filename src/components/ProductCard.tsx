@@ -29,6 +29,7 @@ const ProductCard = ({
   onProductClick 
 }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   const handleQuantityChange = (delta: number) => {
     const newQuantity = Math.max(1, quantity + delta);
@@ -43,6 +44,18 @@ const ProductCard = ({
     onProductClick(product.id);
   };
 
+  const handleImageLoad = () => {
+    console.log('Image loaded successfully:', product.image);
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    console.error('Failed to load image:', product.image);
+    setImageError(true);
+    setImageLoaded(true); // Still set to true to hide skeleton
+  };
+
   return (
     <div className="w-full px-4 mb-3">
       <div 
@@ -53,15 +66,26 @@ const ProductCard = ({
           {!imageLoaded && (
             <Skeleton className="w-full h-full absolute inset-0" />
           )}
-          <img
-            src={product.image}
-            alt={product.name}
-            loading="lazy"
-            className={`w-full h-full object-cover transition-opacity duration-500 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-          />
+          
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <div className="text-center p-4">
+                <p className="text-gray-500 text-sm mb-2">Image not available</p>
+                <p className="text-xs text-gray-400">{product.name}</p>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={product.image}
+              alt={product.name}
+              loading="lazy"
+              className={`w-full h-full object-cover transition-opacity duration-500 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+            />
+          )}
           
           {/* Top-left checkbox */}
           <div className="absolute top-3 left-3 product-controls">

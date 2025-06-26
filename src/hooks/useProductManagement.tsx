@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,6 +29,7 @@ interface ProductManagementContextType {
   addHeroImage: (data: HeroImage) => Promise<void>;
   isLoading: boolean;
   error: string | null;
+  refetch: () => Promise<void>;
 }
 
 const ProductManagementContext = createContext<ProductManagementContextType | undefined>(undefined);
@@ -50,24 +50,28 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
       setIsLoading(true);
       setError(null);
 
-      // Load products
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: true });
+      console.log('Loading data from Supabase...');
 
-      if (productsError) throw productsError;
+      // Load products and hero images in parallel for better performance
+      const [productsResponse, heroImagesResponse] = await Promise.all([
+        supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('hero_images')
+          .select('*')
+          .order('created_at', { ascending: true })
+      ]);
 
-      // Load hero images
-      const { data: heroImagesData, error: heroImagesError } = await supabase
-        .from('hero_images')
-        .select('*')
-        .order('created_at', { ascending: true });
+      if (productsResponse.error) throw productsResponse.error;
+      if (heroImagesResponse.error) throw heroImagesResponse.error;
 
-      if (heroImagesError) throw heroImagesError;
+      console.log('Products data:', productsResponse.data);
+      console.log('Hero images data:', heroImagesResponse.data);
 
       // Transform data to match our interface
-      const transformedProducts = productsData?.map(p => ({
+      const transformedProducts = productsResponse.data?.map(p => ({
         id: p.id,
         name: p.name,
         price: p.price,
@@ -76,13 +80,16 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
         updatedAt: p.updated_at
       })) || [];
 
-      const transformedHeroImages = heroImagesData?.map(h => ({
+      const transformedHeroImages = heroImagesResponse.data?.map(h => ({
         id: h.id,
         src: h.src,
         alt: h.alt,
         createdAt: h.created_at,
         updatedAt: h.updated_at
       })) || [];
+
+      console.log('Transformed products:', transformedProducts);
+      console.log('Transformed hero images:', transformedHeroImages);
 
       setProducts(transformedProducts);
       setHeroImages(transformedHeroImages);
@@ -92,6 +99,11 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Add refetch function for manual data refresh
+  const refetch = async () => {
+    await loadData();
   };
 
   // Product management functions
@@ -265,7 +277,8 @@ export const ProductManagementProvider = ({ children }: { children: ReactNode })
     deleteHeroImage,
     addHeroImage,
     isLoading,
-    error
+    error,
+    refetch
   };
 
   return (

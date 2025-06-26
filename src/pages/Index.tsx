@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductCard from "@/components/ProductCard";
@@ -22,8 +22,9 @@ const Index = () => {
 
   const { products, isLoading, error } = useProductManagement();
 
-  const selectedProducts = getSelectedProducts(products);
-  const totalYards = getTotalYards(products);
+  // Memoize expensive calculations
+  const selectedProducts = useMemo(() => getSelectedProducts(products), [products, getSelectedProducts]);
+  const totalYards = useMemo(() => getTotalYards(products), [products, getTotalYards]);
 
   const handleProductClick = (productId: string) => {
     setSelectedProductId(productId);
@@ -33,7 +34,10 @@ const Index = () => {
     setSelectedProductId(null);
   };
 
-  const selectedProduct = products.find(p => p.id === selectedProductId);
+  const selectedProduct = useMemo(() => 
+    products.find(p => p.id === selectedProductId), 
+    [products, selectedProductId]
+  );
 
   if (selectedProduct) {
     return (
@@ -50,6 +54,12 @@ const Index = () => {
         <div className="text-center p-6">
           <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Products</h2>
           <p className="text-gray-600">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -69,6 +79,10 @@ const Index = () => {
                 <Skeleton className="w-full aspect-[4/5] rounded-2xl" />
               </div>
             ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center p-8">
+            <p className="text-gray-600">No products available</p>
           </div>
         ) : (
           products.map((product) => {
