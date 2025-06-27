@@ -14,11 +14,17 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
   const [email, setEmail] = useState("");
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showContainer, setShowContainer] = useState(false);
 
   // Calculate total price - ₦3,500 per yard
   const totalAmount = totalYards * 3500;
 
   const handlePayment = () => {
+    if (!showContainer) {
+      setShowContainer(true);
+      return;
+    }
+
     if (!email.trim()) {
       setShowEmailInput(true);
       return;
@@ -59,14 +65,18 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
 
   return (
     <div className="fixed bottom-6 left-4 right-4 z-50">
-      <div className="backdrop-blur-xl bg-black/20 border border-white/10 rounded-3xl p-4 shadow-2xl">
-        {showEmailInput && (
+      <div className={`transition-all duration-300 ease-out ${
+        showContainer 
+          ? 'backdrop-blur-xl bg-black/20 border border-white/10 rounded-3xl p-4 shadow-2xl opacity-100' 
+          : 'p-0 opacity-100'
+      }`}>
+        {showEmailInput && showContainer && (
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="w-full px-4 py-3 mb-4 rounded-2xl border border-white/30 bg-white/10 backdrop-blur-sm placeholder-white/70 text-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50"
+            className="w-full px-4 py-3 mb-4 rounded-2xl border border-white/30 bg-white/10 backdrop-blur-sm placeholder-white/70 text-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50 animate-fade-in"
             autoFocus
           />
         )}
