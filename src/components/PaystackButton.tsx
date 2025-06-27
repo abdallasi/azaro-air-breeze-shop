@@ -22,11 +22,11 @@ const PaystackButton = ({ selectedProducts, totalYards }: PaystackButtonProps) =
   const handlePayment = () => {
     if (!showContainer) {
       setShowContainer(true);
+      setShowEmailInput(true);
       return;
     }
 
     if (!email.trim()) {
-      setShowEmailInput(true);
       return;
     }
 
