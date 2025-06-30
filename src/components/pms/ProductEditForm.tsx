@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { imageUploadService } from "@/services/imageUploadService";
 
 interface Product {
   id: string;
@@ -23,6 +24,7 @@ const ProductEditForm = ({ product, onSave, onCancel }: ProductEditFormProps) =>
     price: product?.price || 3500,
     image: product?.image || ""
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,13 +32,21 @@ const ProductEditForm = ({ product, onSave, onCancel }: ProductEditFormProps) =>
     onSave(formData);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Create a unique identifier for product images
-      const productImageUrl = URL.createObjectURL(file);
-      console.log('Product image uploaded:', productImageUrl);
-      setFormData({ ...formData, image: productImageUrl });
+      setIsUploading(true);
+      try {
+        console.log('Starting image upload for product...');
+        const imageUrl = await imageUploadService.uploadImage(file, 'product-images');
+        console.log('Product image uploaded successfully:', imageUrl);
+        setFormData({ ...formData, image: imageUrl });
+      } catch (error) {
+        console.error('Failed to upload product image:', error);
+        alert('Failed to upload image. Please try again.');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -70,7 +80,11 @@ const ProductEditForm = ({ product, onSave, onCancel }: ProductEditFormProps) =>
           type="file"
           accept="image/*"
           onChange={handleImageUpload}
+          disabled={isUploading}
         />
+        {isUploading && (
+          <p className="text-sm text-gray-600 mt-1">Uploading image...</p>
+        )}
         {formData.image && (
           <div className="mt-2">
             <p className="text-sm text-gray-600 mb-1">Product Preview:</p>
@@ -84,7 +98,7 @@ const ProductEditForm = ({ product, onSave, onCancel }: ProductEditFormProps) =>
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" className="bg-black hover:bg-gray-800">
+        <Button type="submit" className="bg-black hover:bg-gray-800" disabled={isUploading}>
           Save Product
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>

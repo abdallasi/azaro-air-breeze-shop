@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { imageUploadService } from "@/services/imageUploadService";
 
 interface HeroImage {
   src: string;
@@ -20,6 +21,7 @@ const HeroEditForm = ({ hero, onSave, onCancel }: HeroEditFormProps) => {
     src: hero?.src || "",
     alt: hero?.alt || ""
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,13 +29,21 @@ const HeroEditForm = ({ hero, onSave, onCancel }: HeroEditFormProps) => {
     onSave(formData);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Create a unique identifier for hero images
-      const heroImageUrl = URL.createObjectURL(file);
-      console.log('Hero image uploaded:', heroImageUrl);
-      setFormData({ ...formData, src: heroImageUrl });
+      setIsUploading(true);
+      try {
+        console.log('Starting image upload for hero...');
+        const imageUrl = await imageUploadService.uploadImage(file, 'hero-images');
+        console.log('Hero image uploaded successfully:', imageUrl);
+        setFormData({ ...formData, src: imageUrl });
+      } catch (error) {
+        console.error('Failed to upload hero image:', error);
+        alert('Failed to upload image. Please try again.');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -57,7 +67,11 @@ const HeroEditForm = ({ hero, onSave, onCancel }: HeroEditFormProps) => {
           type="file"
           accept="image/*"
           onChange={handleImageUpload}
+          disabled={isUploading}
         />
+        {isUploading && (
+          <p className="text-sm text-gray-600 mt-1">Uploading image...</p>
+        )}
         {formData.src && (
           <div className="mt-2">
             <p className="text-sm text-gray-600 mb-1">Hero Preview:</p>
@@ -71,7 +85,7 @@ const HeroEditForm = ({ hero, onSave, onCancel }: HeroEditFormProps) => {
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" className="bg-black hover:bg-gray-800">
+        <Button type="submit" className="bg-black hover:bg-gray-800" disabled={isUploading}>
           Save Hero Image
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
