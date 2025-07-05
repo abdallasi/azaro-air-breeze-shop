@@ -7,7 +7,7 @@ export const productService = {
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Products error:', error);
@@ -19,6 +19,7 @@ export const productService = {
       name: p.name,
       price: p.price,
       image: p.image,
+      description: p.description,
       createdAt: p.created_at,
       updatedAt: p.updated_at
     })) || [];
@@ -33,6 +34,7 @@ export const productService = {
         name: data.name,
         price: data.price,
         image: data.image,
+        description: data.description,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
@@ -61,7 +63,8 @@ export const productService = {
         id: newId,
         name: data.name,
         price: data.price,
-        image: data.image
+        image: data.image,
+        description: data.description
       });
 
     if (error) throw error;

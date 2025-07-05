@@ -6,6 +6,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  description?: string;
 }
 
 interface ProductDetailViewProps {
@@ -14,6 +15,9 @@ interface ProductDetailViewProps {
 }
 
 const ProductDetailView = ({ product, onBack }: ProductDetailViewProps) => {
+  const defaultDescription = "Fabric designed for heat. For the hustle. For the street. For home. Cooked in Kano, adopted worldwide";
+  const description = product.description || defaultDescription;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -47,10 +51,9 @@ const ProductDetailView = ({ product, onBack }: ProductDetailViewProps) => {
         
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-black mb-2">About Azaro Air</h3>
+            <h3 className="text-lg font-semibold text-black mb-2">Description</h3>
             <p className="text-gray-600 leading-relaxed">
-              Premium breathable fabric designed specifically for Nigerian and Middle East heat. 
-              Ultra-lightweight and airy, perfect for creating comfortable garments that keep you cool.
+              {description}
             </p>
           </div>
           

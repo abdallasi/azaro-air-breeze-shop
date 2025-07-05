@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { imageUploadService } from "@/services/imageUploadService";
 
 interface Product {
@@ -10,6 +11,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  description?: string;
 }
 
 interface ProductEditFormProps {
@@ -22,7 +24,8 @@ const ProductEditForm = ({ product, onSave, onCancel }: ProductEditFormProps) =>
   const [formData, setFormData] = useState({
     name: product?.name || "",
     price: product?.price || 3500,
-    image: product?.image || ""
+    image: product?.image || "",
+    description: product?.description || ""
   });
   const [isUploading, setIsUploading] = useState(false);
 
@@ -70,6 +73,17 @@ const ProductEditForm = ({ product, onSave, onCancel }: ProductEditFormProps) =>
           value={formData.price}
           onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
           required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description (Optional)</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Fabric designed for heat. For the hustle. For the street. For home. Cooked in Kano, adopted worldwide"
+          rows={3}
         />
       </div>
 

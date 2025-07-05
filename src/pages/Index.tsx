@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductCard from "@/components/ProductCard";
 import ProductDetailView from "@/components/ProductDetailView";
-import PaystackButton from "@/components/PaystackButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { useProductSelection } from "@/hooks/useProductSelection";
 import { useProductManagement } from "@/hooks/useProductManagement";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -102,7 +102,7 @@ const Index = () => {
         )}
       </div>
 
-      <PaystackButton 
+      <WhatsAppButton 
         selectedProducts={selectedProducts}
         totalYards={totalYards}
       />
